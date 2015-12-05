@@ -10,14 +10,15 @@
 #include <chrono>
 #include <thread>
 
-#define HERTZ_VERSION "1.0.0" // (2015/09/19) Initial version
+#define HERTZ_VERSION "1.0.1" /* (2015/12/05) Add unlock function
+#define HERTZ_VERSION "1.0.0" // (2015/09/19) Initial commit */
 
 namespace hertz {
     // function that locks your logic and render to desired framerate (in HZ).
     // returns number of current fps
     template<typename FNU, typename FNR>
     static inline
-    double lock( unsigned HZ, FNU &update, FNR &render ) {
+    double lock( signed HZ, FNU &update, FNR &render ) {
         // rw vars
         static volatile unsigned hz = 60, isGameRunning = 1, maxframeskip = 10;
         // ro vars
@@ -46,10 +47,12 @@ namespace hertz {
                     isGameRunning = 1;
                 }).detach();
             }
-            ~install() {
-                for( hz = 10000, isGameRunning = 0; !isGameRunning ; );
-            }
         } timer;
+
+        if( HZ < 0 ) {
+            isGameRunning = 0;
+            return 1;
+        }
 
         hz = HZ > 0 ? HZ : hz;
 
@@ -71,6 +74,11 @@ namespace hertz {
             render();
         }
         return fps;
+    }
+
+    static inline void unlock() {
+        auto nil = []{};
+        hertz::lock( -1, nil, nil );
     }
 }
 
@@ -114,6 +122,8 @@ int main() {
     for(;;) {
         fps = hertz::lock( HZ, update, render );
     }
+
+    hertz::unlock();
 }
 
 #endif

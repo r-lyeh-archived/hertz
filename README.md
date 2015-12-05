@@ -10,8 +10,9 @@ Hertz :watch: <a href="https://travis-ci.org/r-lyeh/hertz"><img src="https://api
 ### API
 ```c++
 double /*fps*/ hertz::lock( 60 /*Hz*/, []{/*logic*/}, []{/*render*/} );
+          void hertz::unlock(); // quit
 ```
 
 ### Changelog
-- v1.0.0 (2015/09/19)
-  - Initial version
+- v1.0.0 (2015/12/05): Add unlock function
+- v1.0.0 (2015/09/19): Initial commit
